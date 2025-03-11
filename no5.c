@@ -15,6 +15,9 @@ typedef struct {
     int count;
 } Queue;
 
+Mahasiswa history[MAX];
+int jmlh_his = 0;
+
 void Inisialisasi(Queue *q){
     q->front = q->rear = q->count = 0;
 }
@@ -82,28 +85,56 @@ void Enqueue_Priority(Queue *q){
     int total = q->count;
     Inisialisasi(q);
 
-    for (i = 0; i < total; i++) {
+    for(i=0; i<total; i++){
         Enqueue(q, temp[i]);
     }
 }
 
+void hapus(Queue *q, char nama[]) {
+    for(int i=0, j=q->front; i<q->count; i++, j = (j+1) % MAX) {
+        if (strcmp(q->mhs[j].nama, nama) == 0) {
+            history[jmlh_his] = q->mhs[j];
+            jmlh_his++;
+
+            strcpy(q->mhs[j].nama, "*");
+            strcpy(q->mhs[j].nrp, "*");
+            q->mhs[j].nilai = 0;
+            break;
+        }
+    }
+}
 
 void show(Queue *q){
-    if (Kosong(q)) {
+    if(Kosong(q)){
         printf("Queue kosong!\n");
         return;
     }
 
     int i, j;
-    for (i = 0, j = q->front; i < q->count; i++, j = (j + 1) % MAX) {
-        printf("%s %s %d\n", q->mhs[j].nama, q->mhs[j].nrp, q->mhs[j].nilai);
+    for(i = 0, j = q->front; i < q->count; i++, j = (j + 1) % MAX) {
+        printf("|%s\t|\n|%s\t|\n|%d\t|", q->mhs[j].nama, q->mhs[j].nrp, q->mhs[j].nilai);
+        printf("\n===========\n");
+    }
+}
+
+void showDeletedData(){
+    if(jmlh_his == 0){
+        printf("\nTidak ada data yang dikeluarkan.\n");
+    }else{
+        printf("\nData yang telah dikeluarkan:\n");
+        for (int i = 0; i < jmlh_his; i++) {
+            printf("Nama : %s\n", history[i].nama);
+            printf("NRP  : %s\n", history[i].nrp);
+            printf("Nilai: %d\n", history[i].nilai);
+            printf("---------------------\n");
+        }
     }
 }
 
 int main(){
     Queue ant;
     Mahasiswa x;
-    char kar = 'y';
+    char kar = 'y', kar2 = 'y', nama[50];
 
     Inisialisasi(&ant);
 
@@ -134,6 +165,24 @@ int main(){
 
     printf("\nData setelah diurutkan:\n");
     show(&ant);
+
+    while (kar2 == 'y' || kar2 == 'Y') {
+        printf("\nMasukkan nama yang ingin dikeluarkan: ");
+        fgets(nama, 50, stdin);
+        nama[strcspn(nama, "\n")] = '\0';
+
+        hapus(&ant, nama);
+
+        printf("\nData setelah pengeluaran:\n");
+        show(&ant);
+
+        printf("\nAda lagi? (y/t): ");
+        scanf(" %c", &kar2);
+        fflush(stdin);
+    }
+
+    show(&ant);
+    showDeletedData();
 
     return 0;
 }
